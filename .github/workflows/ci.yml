@@ -57,5 +57,5 @@ jobs:
           JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
       - run: docker login ${{ secrets.JF_DOCKER_REPO_HOST }} -u ${{ secrets.JF_USERNAME }} -p ${{ secrets.JF_ACCESS_TOKEN }}
       - run: docker build -t ${{ secrets.JF_DOCKER_REPO_HOST }}/docker-local/spring-petclinic:${{ github.sha }} .
-      - run: jf docker push ${{ secrets.JF_DOCKER_REPO_HOST }}/docker-local/spring-petclinic:${{ github.sha }}
+      - run: docker push ${{ secrets.JF_DOCKER_REPO_HOST }}/docker-local/spring-petclinic:${{ github.sha }}
       - run: jf rt build-publish spring-petclinic ${{ github.run_number }}
