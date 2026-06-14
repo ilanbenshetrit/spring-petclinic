@@ -15,7 +15,7 @@ jobs:
         env:
           JF_URL: ${{ secrets.JF_URL }}
           JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
-      - run: jf mvnc --repo-resolve-releases libs-release
+      - run: jf mvnc --repo-resolve-releases libs-release --repo-resolve-snapshots libs-release --repo-deploy-releases libs-release-local --repo-deploy-snapshots libs-release-local
       - run: jf mvn clean test
         env:
           BUILD_NAME: spring-petclinic
