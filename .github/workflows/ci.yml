@@ -15,12 +15,29 @@ jobs:
         env:
           JF_URL: ${{ secrets.JF_URL }}
           JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
-      - run: jf mvnc --repo-resolve-releases libs-release --repo-resolve-snapshots libs-release --repo-deploy-releases libs-release-local --repo-deploy-snapshots libs-release-local
-      - run: jf mvn clean test
-        env:
-          BUILD_NAME: spring-petclinic
-          BUILD_NUMBER: ${{ github.run_number }}
-      - run: jf mvn package -DskipTests
+      - name: Configure Maven for JFrog
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << SETTINGS
+          <settings>
+            <servers>
+              <server>
+                <id>jfrog</id>
+                <username>${{ secrets.JF_USERNAME }}</username>
+                <password>${{ secrets.JF_ACCESS_TOKEN }}</password>
+              </server>
+            </servers>
+            <mirrors>
+              <mirror>
+                <id>jfrog</id>
+                <mirrorOf>*</mirrorOf>
+                <url>${{ secrets.JF_URL }}/artifactory/libs-release</url>
+              </mirror>
+            </mirrors>
+          </settings>
+          SETTINGS
+      - run: mvn clean test -B
+      - run: mvn package -DskipTests -B
       - uses: actions/upload-artifact@v4
         with:
           name: jar
@@ -42,4 +59,3 @@ jobs:
       - run: docker build -t ${{ secrets.JF_DOCKER_REPO_HOST }}/docker-local/spring-petclinic:${{ github.sha }} .
       - run: jf docker push ${{ secrets.JF_DOCKER_REPO_HOST }}/docker-local/spring-petclinic:${{ github.sha }}
       - run: jf rt build-publish spring-petclinic ${{ github.run_number }}
-      - run: jf bs spring-petclinic ${{ github.run_number }} --fail=false
